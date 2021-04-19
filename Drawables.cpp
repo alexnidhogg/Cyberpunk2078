@@ -322,7 +322,7 @@ void initTextures() {
     mTextures.push_back(new Texture("Textures/sans.tga", GL_CLAMP, GL_LINEAR));
 
     //mTextures.push_back(new Texture("Textures/bricks_overpainted_blue_9291383.tga", GL_REPEAT, GL_LINEAR));
-    glGenTextures(3, &TextureID[0]);
+    glGenTextures(3, TextureID);
 
     for (int i = 0; i < mTextures.size(); i++) {
         glBindTexture(GL_TEXTURE_2D, TextureID[i]);
@@ -335,7 +335,6 @@ void initTextures() {
         glBindTexture(GL_TEXTURE_2D, TextureID[i]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mTextures[i]->mWidth, mTextures[i]->mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, mTextures[i]->mData);
     }
-
 }
 
 void drawWall() {

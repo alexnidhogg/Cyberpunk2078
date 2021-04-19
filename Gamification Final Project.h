@@ -1,7 +1,7 @@
 #pragma once
 
 #define move_speed 0.009
-float EnemySpeed = 0.002;
+float EnemySpeed = 0.007;
 
 bool Initialize(int argc, char* argv[]);
 bool InitWindow(int argc, char* argv[]);

@@ -25,12 +25,18 @@ bool A_was_pressed = false;
 bool S_was_pressed = false;
 bool D_was_pressed = false;
 
+bool Mouse_Clicked = false;
+bool Mouse_was_clicked = false;
+
 bool Space_input = false;
 
 bool Shift_input = false;
 
 bool Escape_input = false;
 bool Escape_was_pressed = false;
+
+int Ammo = 6;
+int MaxAmmo = 6;
 
 bool paused = false;
 
@@ -45,13 +51,16 @@ float focal_x;
 float focal_y;
 float focal_z;
 
+int health = 25;
+int max_health = 50;
+
 bool wall_rotated = false;
 float wall_x = -1.0;
 float wall_z = 0.0;
 float door_distance = 0.5;
 float door_width = 1.0;
 
-Enemy enemy;
+Enemy enemy = Enemy();
 
 /*
 bool wall_rotated = true;
@@ -95,7 +104,9 @@ bool Initialize(int argc, char* argv[])
     focal_y = 0.0;
     focal_z = 0.0;
 
-    enemy = Enemy();
+    enemy.exists = true;
+    enemy.x = 0.0;
+    enemy.z = 0.0;
 
     if (!InitWindow(argc, argv)) {
         return false;
@@ -111,6 +122,10 @@ bool Initialize(int argc, char* argv[])
 bool InitWindow(int argc, char* argv[])
 {
     glutInit(&argc, argv);
+
+    player_x = 0.0;
+    player_ele = 0.0;
+    player_z = -0.9;
 
     glutInitWindowSize(800, 600);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
@@ -165,6 +180,7 @@ void Render()
     glLoadIdentity();
 
     GetInput();
+    std::cout << A_input << W_input << S_input << D_input << '\n';
     MousePosition();
     GameLogic();
 
@@ -220,28 +236,44 @@ void Render()
     drawInnerWall(wall_x, wall_z, door_distance, -wall_x, -wall_z, door_width, wall_rotated);
     DrawAllSans(false);
     
+    //UI
 
-    /*
-    glColor3f(1.0, 1.0, 0.5);
-    glPushMatrix();
-    glRotatef(90, 1, 0, 0);
-    glTranslatef(0.0f, 0.0f, 0.5f);
-    drawWall();
-    glPopMatrix();
+    unsigned char AmmoCount[2];
+    strcpy_s((char*)AmmoCount, 2, std::to_string(Ammo).c_str());
 
-    glPushMatrix();
-    glRotatef(90, 0, 1, 0);
-    glTranslatef(0.0f, 0.0f, 0.5f);
-    drawWall();
-    glPopMatrix();
+    unsigned char MaxAmmoCount[2];
+    strcpy_s((char*)MaxAmmoCount, 2, std::to_string(MaxAmmo).c_str());
 
-    glPushMatrix();
-    glRotatef(90, 0, 0, 0);
-    glTranslatef(0.0f, 0.0f, 0.5f);
-    drawWall();
-    glPopMatrix();
-    */
+    unsigned char* Divider = (unsigned char*)"/";
 
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+    float pos_x = 0.0;
+    float pos_y = 0.0;
+    float pos_z = 0.0;
+
+    pos_x = player_x + sin(angle_rot) * 2;
+    pos_y = player_ele + sin(angle_height) * 2;
+    pos_z = player_z - cos(angle_rot) * 2;
+    
+    glRasterPos3f(pos_x, pos_y, pos_z);
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, (const unsigned char*)"\n\n\n\n\n\n\n\n\n\n                                                        ");
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, AmmoCount);
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, Divider);
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, MaxAmmoCount);
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, (const unsigned char*)" ~ Ammo");
+
+    glRasterPos3f(pos_x, pos_y, pos_z);
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, (const unsigned char*)"\n\n\n\n\n\n\n\n\n\n\n\n                     ");
+    for (int i = 0; i < round(float(max_health - health)*0.8); i++)
+    {
+        glutBitmapString(GLUT_BITMAP_HELVETICA_18, (const unsigned char*)" ");
+    }
+    for (int i = 0; i < health; i++) 
+    {
+        glutBitmapString(GLUT_BITMAP_HELVETICA_18, (const unsigned char*)"|");
+    }
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, (const unsigned char*)" ~ Health");
 
     GLenum err = glGetError();
     if (err != GL_NO_ERROR)
@@ -250,7 +282,6 @@ void Render()
         return;
     }
 
-    glFlush();
     glutSwapBuffers();
 
 }
@@ -267,6 +298,8 @@ void GetInput()
     A_input = (GetKeyState(0x41) & 0x8000);
     S_input = (GetKeyState(0x53) & 0x8000);
     D_input = (GetKeyState(0x44) & 0x8000);
+
+    Mouse_Clicked = (GetKeyState(VK_LBUTTON) & 0x8000);
 
     Escape_input = (GetKeyState(VK_ESCAPE) & 0x8000);
 
@@ -424,11 +457,12 @@ void GameLogic()
     {
         if (player_z > wall_z == enemy.z > wall_z)
         {
+
             //Same side
             float x_dist = enemy.x - player_x;
             float z_dist = enemy.z - player_z;
 
-            float angle = atan(x_dist / z_dist);
+            float angle = atan2(x_dist, z_dist);
 
             if (player_x < enemy.x)
             {
@@ -480,11 +514,12 @@ void GameLogic()
             }
             else
             {
+                
                 //in door
                 float x_dist = enemy.x - player_x;
                 float z_dist = enemy.z - player_z;
 
-                float angle = atan(x_dist / z_dist);
+                float angle = atan2(x_dist, z_dist);
 
                 if (player_x < enemy.x)
                 {
@@ -511,7 +546,6 @@ void GameLogic()
 
 void MousePosition()
 {
-    
     POINT p;
 
     int win_x = glutGet(GLUT_WINDOW_X);
@@ -531,18 +565,17 @@ void MousePosition()
             angle_rot += float(p.x) / win_w * 2;
             angle_height += -float(p.y) / win_h * 2;
 
-            if (angle_height > 1.7) {
-                angle_height = 1.7;
+            if (angle_height > 1.0) {
+                angle_height = 1.0;
             }
-            else if (angle_height < -1.7)
+            else if (angle_height < -1.0)
             {
-                angle_height = -1.7;
+                angle_height = -1.0;
             }
 
             SetCursorPos(win_x + (win_w / 2), win_y + (win_h / 2));
         }
     }
-    
 }
 
 void DrawAllSans(bool behind) {
