@@ -1,7 +1,13 @@
 #pragma once
 
-#define move_speed 0.009
-float EnemySpeed = 0.007;
+#include "Drawables.h"
+#include "Enemy.h"
+#include "Hacking.h"
+
+#define move_speed 0.003
+float EnemySpeed = 0.006;
+
+Orb orbs[4];
 
 bool Initialize(int argc, char* argv[]);
 bool InitWindow(int argc, char* argv[]);
@@ -13,3 +19,10 @@ void frameCallback(int x);
 void GameLogic();
 void MousePosition();
 void DrawAllSans(bool behind);
+void Camera();
+void DrawRoom();
+void DrawGameUi();
+void drawLoseMessage();
+void drawMainMenu();
+void initLevel();
+void drawWinMessage();

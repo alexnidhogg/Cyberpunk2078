@@ -26,7 +26,7 @@ struct TargaHeader {
 };
 
 Texture::Texture() : mTexId(0) {}
-GLuint TextureID[4];
+GLuint TextureID[5];
 
 Texture::Texture(const std::string& fname, GLint wrapMode, GLint filteringMode) 
 {
@@ -320,9 +320,10 @@ void initTextures() {
     mTextures.push_back(new Texture("Textures/Wood.tga", GL_REPEAT, GL_LINEAR));
     mTextures.push_back(new Texture("Textures/Cieling.tga", GL_REPEAT, GL_LINEAR));
     mTextures.push_back(new Texture("Textures/sans.tga", GL_CLAMP, GL_LINEAR));
+    mTextures.push_back(new Texture("Textures/PC.tga", GL_CLAMP, GL_LINEAR));
 
     //mTextures.push_back(new Texture("Textures/bricks_overpainted_blue_9291383.tga", GL_REPEAT, GL_LINEAR));
-    glGenTextures(3, TextureID);
+    glGenTextures(4, TextureID);
 
     for (int i = 0; i < mTextures.size(); i++) {
         glBindTexture(GL_TEXTURE_2D, TextureID[i]);
@@ -338,7 +339,6 @@ void initTextures() {
 }
 
 void drawWall() {
-
 
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -500,4 +500,28 @@ void drawInnerWall(float start_x, float start_z, float door_distance, float end_
         glDisable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, TextureID[0]);
     }
+}
+
+void drawOrbs(Orb* orb)
+{
+    glPushMatrix();
+    glTranslatef(orb->x, 0.0f, orb->y);
+    glRotatef(orb->rotation, 0.0, -1.0, 0.0);
+
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glBindTexture(GL_TEXTURE_2D, TextureID[4]);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex2f(-0.05, -0.05);
+    glTexCoord2f(1.0, 0.0); glVertex2f(0.05, -0.05);
+    glTexCoord2f(1.0, 1.0); glVertex2f(0.05, 0.05);
+    glTexCoord2f(0.0, 1.0); glVertex2f(-0.05, 0.05);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, TextureID[0]);
+
+    orb->rotation += 2;
+
+    glPopMatrix();
 }

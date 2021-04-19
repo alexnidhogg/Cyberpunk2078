@@ -3,6 +3,13 @@
 #include <vector>
 #include <string>
 
+struct Orb {
+    float x;
+    float y;
+    bool done;
+    float rotation;
+};
+
 struct TargaHeader;
 
 class Texture {
@@ -35,3 +42,4 @@ void drawWall();
 void drawFloor();
 void drawCieling();
 void drawInnerWall(float start_x, float start_z, float door_distance, float end_x, float end_z, float door_width, bool rotated);
+void drawOrbs(Orb* orb);
